@@ -1,78 +1,89 @@
-# Reminder Application
+# Reminder App
 
-A web application for managing periodic reminders built with Next.js, TypeScript, and Tailwind CSS.
+A web application for managing reminders based on company-specific deactivation policies.
 
 ## Features
 
-- User authentication (register/login)
-- Create and manage periodic reminders
-- Email notifications for reminders
-- Predefined reminder types with different periods
-- Modern and responsive UI
+- User authentication with email/password
+- Create and manage reminders for different companies
+- Customizable reminder periods for companies with flexible policies
+- Automatic next reminder date calculation
+- Modern, responsive UI built with Tailwind CSS
+
+## Tech Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Supabase (Authentication & Database)
+- NextAuth.js
+- Tailwind CSS
+- Vercel (Deployment)
 
 ## Prerequisites
 
-- Node.js 18.x or later
-- npm 9.x or later
+- Node.js 18+
+- npm or yarn
+- Supabase account
+- Vercel account (for deployment)
 
 ## Setup
 
-1. Clone the repository:
+1. Clone the repository
 ```bash
-git clone <repository-url>
+git clone <your-repo-url>
 cd reminders
 ```
 
-2. Install dependencies:
+2. Install dependencies
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the root directory and add the following environment variables:
-```env
-# NextAuth
+3. Create a `.env.local` file with the following variables:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
-
-# Email (SMTP)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your-email@example.com
-SMTP_PASSWORD=your-password
-SMTP_FROM=noreply@example.com
-SMTP_SECURE=false
+NEXTAUTH_SECRET=your_nextauth_secret
 ```
 
-4. Start the development server:
+4. Set up the database:
+- Create a new Supabase project
+- Run the SQL scripts in the `sql` folder in order:
+  1. `01_reminders.sql`
+  2. `02_profiles.sql`
+
+5. Create a `companies.csv` file in the root directory with the following structure:
+```csv
+name,days_before_deactivation,policy_link
+Company A,30,https://example.com/policy-a
+Company B,60,https://example.com/policy-b
+Company C,0,https://example.com/policy-c
+```
+
+6. Run the development server
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Deployment
 
-## Project Structure
-
-- `/src/app` - Next.js app router pages and API routes
-- `/src/components` - Reusable React components
-- `/src/lib` - Utility functions and database operations
-- `/src/types` - TypeScript type definitions
-- `/data` - JSON files for data storage (created automatically)
+1. Create a new project on Vercel
+2. Connect your repository using a GitHub token with limited scope
+3. Add the environment variables in Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXTAUTH_URL` (your production URL)
+   - `NEXTAUTH_SECRET`
+4. Deploy!
 
 ## Development
 
-- Run development server: `npm run dev`
-- Build for production: `npm run build`
-- Start production server: `npm start`
-- Run linter: `npm run lint`
-
-## Deployment
-
-This application is designed to be deployed on Vercel. To deploy:
-
-1. Push your code to a Git repository
-2. Import the project in Vercel
-3. Configure the environment variables
-4. Deploy
+The application uses:
+- TypeScript for type safety
+- ESLint for code linting
+- Prettier for code formatting
+- Tailwind CSS for styling
 
 ## License
 
