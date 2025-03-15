@@ -1,14 +1,14 @@
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
-import { getUserByEmail } from '@/lib/db';
 
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
@@ -16,11 +16,18 @@ export const authOptions: AuthOptions = {
           throw new Error('Please enter an email and password');
         }
 
-        const user = await getUserByEmail(credentials.email);
-        if (!user) {
+        // Get user from profiles table
+        const { data: user, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', credentials.email)
+          .single();
+
+        if (error || !user) {
           throw new Error('No user found with this email');
         }
 
+        // Verify password
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) {
           throw new Error('Invalid password');

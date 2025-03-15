@@ -21,31 +21,31 @@ export default function RegisterPage() {
     const name = formData.get('name') as string;
 
     try {
-      // Create the user in Supabase Auth
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+        }),
       });
 
-      if (signUpError) throw signUpError;
-      if (!user) throw new Error('User creation failed');
+      const data = await response.json();
+      console.log('Registration response:', { status: response.status, data });
 
-      // Create the user profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: user.id,
-            name,
-            email,
-          }
-        ]);
-
-      if (profileError) throw profileError;
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Registration failed');
+      }
 
       router.push('/login?registered=true');
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Registration error details:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       setError(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setLoading(false);
