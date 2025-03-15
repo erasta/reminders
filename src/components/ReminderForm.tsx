@@ -22,11 +22,11 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
 
   useEffect(() => {
     if (editingReminder) {
-      setCompanyId(editingReminder.companyId);
-      setCompanyUserId(editingReminder.companyUserId);
-      setLastEntryDate(editingReminder.lastEntryDate.split('T')[0]);
-      if (editingReminder.customDays) {
-        setCustomDays(editingReminder.customDays.toString());
+      setCompanyId(editingReminder.company_id);
+      setCompanyUserId(editingReminder.company_user_id);
+      setLastEntryDate(editingReminder.last_entry_date.split('T')[0]);
+      if (editingReminder.custom_days) {
+        setCustomDays(editingReminder.custom_days.toString());
       }
     }
   }, [editingReminder]);

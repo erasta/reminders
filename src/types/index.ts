@@ -23,12 +23,11 @@ export interface ReminderType {
 
 export interface Reminder {
   id: string;
-  userId: string;
-  companyId: string;
-  companyUserId: string;
-  lastEntryDate: string;
-  lastSentDate: string;
-  nextSendDate: string;
-  createdAt: string;
-  customDays?: number;
+  user_id: string;
+  company_id: string;
+  company_user_id: string;
+  last_entry_date: string;
+  next_send_date: string;
+  created_at: string;
+  custom_days?: number;
 } 

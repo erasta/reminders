@@ -115,17 +115,17 @@ export default function DashboardPage() {
               <div className="bg-white shadow overflow-hidden sm:rounded-md">
                 <ul className="divide-y divide-gray-200">
                   {reminders.map((reminder) => {
-                    const company = companies.find(c => c.id === reminder.companyId);
+                    const company = companies.find(c => c.id === reminder.company_id);
                     return (
                       <li key={reminder.id} className="px-6 py-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="text-lg font-medium text-gray-900">
-                              {company?.name} - User ID: {reminder.companyUserId}
+                              {company?.name} - User ID: {reminder.company_user_id}
                             </h3>
                             <div className="mt-2 text-sm text-gray-500">
-                              <p>Last entry: {format(reminder.lastEntryDate ? new Date(reminder.lastEntryDate) : new Date(), 'PPP')}</p>
-                              <p>Next reminder: {format(new Date(reminder.nextSendDate), 'PPP')}</p>
+                              <p>Last entry: {format(reminder.last_entry_date ? new Date(reminder.last_entry_date) : new Date(), 'PPP')}</p>
+                              <p>Next reminder: {format(new Date(reminder.next_send_date), 'PPP')}</p>
                             </div>
                           </div>
                           <div className="flex space-x-2">

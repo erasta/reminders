@@ -15,7 +15,7 @@ export async function GET() {
     const { data: reminders, error } = await supabase
       .from('reminders')
       .select('*')
-      .eq('userId', session.user.id);
+      .eq('user_id', session.user.id);
 
     if (error) throw error;
     return NextResponse.json(reminders);
@@ -64,12 +64,12 @@ export async function POST(request: Request) {
     const { data: reminder, error } = await supabase
       .from('reminders')
       .insert([{
-        userId: session.user.id,
-        companyId,
-        companyUserId,
-        lastEntryDate: lastEntryDateTime.toISOString(),
-        nextSendDate: nextSendDate.toISOString(),
-        customDays: company.days_before_deactivation === 0 ? customDays : null,
+        user_id: session.user.id,
+        company_id: companyId,
+        company_user_id: companyUserId,
+        last_entry_date: lastEntryDateTime.toISOString(),
+        next_send_date: nextSendDate.toISOString(),
+        custom_days: company.days_before_deactivation === 0 ? customDays : null,
       }])
       .select()
       .single();

@@ -19,7 +19,7 @@ export async function DELETE(
       .from('reminders')
       .delete()
       .eq('id', params.id)
-      .eq('userId', session.user.id);
+      .eq('user_id', session.user.id);
 
     if (error) throw error;
     return new NextResponse(null, { status: 204 });
@@ -71,14 +71,14 @@ export async function PUT(
     const { data: reminder, error } = await supabase
       .from('reminders')
       .update({
-        companyId,
-        companyUserId,
-        lastEntryDate: lastEntryDateTime.toISOString(),
-        nextSendDate: nextSendDate.toISOString(),
-        customDays: company.days_before_deactivation === 0 ? customDays : null,
+        company_id: companyId,
+        company_user_id: companyUserId,
+        last_entry_date: lastEntryDateTime.toISOString(),
+        next_send_date: nextSendDate.toISOString(),
+        custom_days: company.days_before_deactivation === 0 ? customDays : null,
       })
       .eq('id', params.id)
-      .eq('userId', session.user.id)
+      .eq('user_id', session.user.id)
       .select()
       .single();
 
