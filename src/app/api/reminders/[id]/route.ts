@@ -1,21 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getReminders, updateReminder } from '@/lib/db';
 import { addDays } from 'date-fns';
 import { getCompanies } from '@/lib/companies';
-import path from 'path';
-import fs from 'fs/promises';
-
-const REMINDERS_FILE = path.join(process.cwd(), 'data', 'reminders.json');
-
-async function writeData(filePath: string, data: any[]): Promise<void> {
-  try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error(`Error writing to ${filePath}:`, error);
-  }
-}
+import { supabase } from '@/lib/supabase';
 
 export async function DELETE(
   request: Request,
@@ -27,16 +15,13 @@ export async function DELETE(
   }
 
   try {
-    const reminders = await getReminders();
-    const reminderIndex = reminders.findIndex(r => r.id === params.id && r.userId === session.user.id);
-    
-    if (reminderIndex === -1) {
-      return NextResponse.json({ message: 'Reminder not found' }, { status: 404 });
-    }
+    const { error } = await supabase
+      .from('reminders')
+      .delete()
+      .eq('id', params.id)
+      .eq('userId', session.user.id);
 
-    reminders.splice(reminderIndex, 1);
-    await writeData(REMINDERS_FILE, reminders);
-    
+    if (error) throw error;
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Delete reminder error:', error);
@@ -57,7 +42,7 @@ export async function PUT(
   }
 
   try {
-    const { companyId, companyUserId, lastEntryDate } = await request.json();
+    const { companyId, companyUserId, lastEntryDate, customDays } = await request.json();
     
     if (!companyId || !companyUserId || !lastEntryDate) {
       return NextResponse.json(
@@ -76,26 +61,29 @@ export async function PUT(
       );
     }
 
-    const reminders = await getReminders();
-    const reminder = reminders.find(r => r.id === params.id && r.userId === session.user.id);
-
-    if (!reminder) {
-      return NextResponse.json({ message: 'Reminder not found' }, { status: 404 });
-    }
+    const daysBeforeDeactivation = company.days_before_deactivation === 0 
+      ? customDays 
+      : company.days_before_deactivation;
 
     const lastEntryDateTime = new Date(lastEntryDate);
-    const nextSendDate = addDays(lastEntryDateTime, company.days_before_deactivation);
+    const nextSendDate = addDays(lastEntryDateTime, daysBeforeDeactivation);
 
-    const updatedReminder = {
-      ...reminder,
-      companyId,
-      companyUserId,
-      lastEntryDate: lastEntryDateTime.toISOString(),
-      nextSendDate: nextSendDate.toISOString(),
-    };
+    const { data: reminder, error } = await supabase
+      .from('reminders')
+      .update({
+        companyId,
+        companyUserId,
+        lastEntryDate: lastEntryDateTime.toISOString(),
+        nextSendDate: nextSendDate.toISOString(),
+        customDays: company.days_before_deactivation === 0 ? customDays : null,
+      })
+      .eq('id', params.id)
+      .eq('userId', session.user.id)
+      .select()
+      .single();
 
-    await updateReminder(updatedReminder);
-    return NextResponse.json(updatedReminder);
+    if (error) throw error;
+    return NextResponse.json(reminder);
   } catch (error) {
     console.error('Update reminder error:', error);
     return NextResponse.json(

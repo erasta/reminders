@@ -131,13 +131,13 @@ export default function DashboardPage() {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => setEditingReminder(reminder)}
-                              className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-800"
+                              className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteReminder(reminder.id)}
-                              className="px-3 py-1 text-sm font-medium text-red-600 hover:text-red-800"
+                              className="inline-flex justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                             >
                               Delete
                             </button>

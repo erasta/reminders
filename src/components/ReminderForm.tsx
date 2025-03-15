@@ -16,12 +16,18 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
   const [companyId, setCompanyId] = useState('');
   const [companyUserId, setCompanyUserId] = useState('');
   const [lastEntryDate, setLastEntryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customDays, setCustomDays] = useState('180');
+
+  const selectedCompany = companies.find(c => c.id === companyId);
 
   useEffect(() => {
     if (editingReminder) {
       setCompanyId(editingReminder.companyId);
       setCompanyUserId(editingReminder.companyUserId);
       setLastEntryDate(editingReminder.lastEntryDate.split('T')[0]);
+      if (editingReminder.customDays) {
+        setCustomDays(editingReminder.customDays.toString());
+      }
     }
   }, [editingReminder]);
 
@@ -34,6 +40,7 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
       companyId,
       companyUserId,
       lastEntryDate: new Date(lastEntryDate).toISOString(),
+      customDays: selectedCompany?.days_before_deactivation === 0 ? parseInt(customDays) : undefined,
     };
 
     try {
@@ -59,6 +66,7 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
         setCompanyId('');
         setCompanyUserId('');
         setLastEntryDate(new Date().toISOString().split('T')[0]);
+        setCustomDays('180');
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
@@ -88,7 +96,35 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
             </option>
           ))}
         </select>
+        {selectedCompany?.policy_link && (
+          <a 
+            href={selectedCompany.policy_link} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="mt-1 text-sm text-indigo-600 hover:text-indigo-800 block"
+          >
+            View Policy
+          </a>
+        )}
       </div>
+
+      {selectedCompany?.days_before_deactivation === 0 && (
+        <div className="w-1/2">
+          <label htmlFor="customDays" className="block text-sm font-medium text-gray-700">
+            Days Before Deactivation
+          </label>
+          <input
+            type="number"
+            id="customDays"
+            name="customDays"
+            value={customDays}
+            onChange={(e) => setCustomDays(e.target.value)}
+            min="1"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10"
+            required
+          />
+        </div>
+      )}
 
       <div className="w-1/2">
         <label htmlFor="companyUserId" className="block text-sm font-medium text-gray-700">

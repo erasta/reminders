@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { createReminder, getUserReminders } from '@/lib/db';
-import { v4 as uuidv4 } from 'uuid';
-import { getCompanies } from '@/lib/companies';
-import { addDays } from 'date-fns';
 import { authOptions } from '@/lib/auth';
+import { addDays } from 'date-fns';
+import { getCompanies } from '@/lib/companies';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -12,14 +11,21 @@ export async function GET() {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const reminders = await getUserReminders(session.user.id);
-  // Set lastEntryDate to createdAt for existing reminders that don't have it
-  const updatedReminders = reminders.map(reminder => ({
-    ...reminder,
-    lastEntryDate: reminder.lastEntryDate || reminder.createdAt
-  }));
-  
-  return NextResponse.json(updatedReminders);
+  try {
+    const { data: reminders, error } = await supabase
+      .from('reminders')
+      .select('*')
+      .eq('userId', session.user.id);
+
+    if (error) throw error;
+    return NextResponse.json(reminders);
+  } catch (error) {
+    console.error('Get reminders error:', error);
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -29,9 +35,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { companyId, companyUserId } = await request.json();
+    const { companyId, companyUserId, lastEntryDate, customDays } = await request.json();
     
-    if (!companyId || !companyUserId) {
+    if (!companyId || !companyUserId || !lastEntryDate) {
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -48,21 +54,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const now = new Date();
-    const nextSendDate = addDays(now, company.days_before_deactivation);
+    const daysBeforeDeactivation = company.days_before_deactivation === 0 
+      ? customDays 
+      : company.days_before_deactivation;
 
-    const reminder = await createReminder({
-      id: uuidv4(),
-      userId: session.user.id,
-      companyId,
-      companyUserId,
-      lastEntryDate: now.toISOString(),
-      lastSentDate: now.toISOString(),
-      nextSendDate: nextSendDate.toISOString(),
-      createdAt: now.toISOString(),
-    });
+    const lastEntryDateTime = new Date(lastEntryDate);
+    const nextSendDate = addDays(lastEntryDateTime, daysBeforeDeactivation);
 
-    return NextResponse.json(reminder, { status: 201 });
+    const { data: reminder, error } = await supabase
+      .from('reminders')
+      .insert([{
+        userId: session.user.id,
+        companyId,
+        companyUserId,
+        lastEntryDate: lastEntryDateTime.toISOString(),
+        nextSendDate: nextSendDate.toISOString(),
+        customDays: company.days_before_deactivation === 0 ? customDays : null,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json(reminder);
   } catch (error) {
     console.error('Create reminder error:', error);
     return NextResponse.json(
