@@ -4,15 +4,11 @@ import { useState } from 'react';
 import { register, login } from './actions';
 import { InputField } from './InputField';
 import { Message } from './Message';
-
-interface ValidationError {
-  field: string;
-  message: string;
-}
+import { validateRegistration, validateLogin, ValidationError, FormData } from './validate';
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     password: ''
@@ -20,45 +16,6 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateRegistration = (): boolean => {
-    const errors: ValidationError[] = [];
-
-    if (!formData.name.trim()) {
-      errors.push({ field: 'name', message: 'Name is required' });
-    }
-
-    if (!validateEmail(formData.email)) {
-      errors.push({ field: 'email', message: 'Invalid email format' });
-    }
-
-    if (formData.password.length < 6) {
-      errors.push({ field: 'password', message: 'Password must be at least 6 characters' });
-    }
-
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
-
-  const validateLogin = (): boolean => {
-    const errors: ValidationError[] = [];
-
-    if (!validateEmail(formData.email)) {
-      errors.push({ field: 'email', message: 'Invalid email format' });
-    }
-
-    if (!formData.password) {
-      errors.push({ field: 'password', message: 'Password is required' });
-    }
-
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
 
   const createFakeData = () => {
     const id = crypto.randomUUID();
@@ -78,7 +35,9 @@ export function AuthForm() {
       setSuccess(false);
       setValidationErrors([]);
 
-      if (!validateRegistration()) {
+      const errors = validateRegistration(formData);
+      if (errors.length > 0) {
+        setValidationErrors(errors);
         return;
       }
 
@@ -102,7 +61,9 @@ export function AuthForm() {
       setSuccess(false);
       setValidationErrors([]);
 
-      if (!validateLogin()) {
+      const errors = validateLogin(formData);
+      if (errors.length > 0) {
+        setValidationErrors(errors);
         return;
       }
 
