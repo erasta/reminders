@@ -8,9 +8,10 @@ import { validateRegistration, ValidationError, FormData } from './validate';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
+  onRegisterSuccess: (token: string) => void;
 }
 
-export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
+export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -47,8 +48,12 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       
       if (!result.success) {
         setError('Registration failed');
-      } else {
+      } else if (result.token) {
         setSuccess(true);
+        // Store the token
+        onRegisterSuccess(result.token);
+      } else {
+        setError('Registration failed: No token received');
       }
     } catch (error) {
       console.error('Registration error:', error);

@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { validateRegistration, validateLogin } from './validate';
+import { createToken } from './token';
 
 export async function register(name: string, email: string, password: string) {
   try {
@@ -22,7 +23,15 @@ export async function register(name: string, email: string, password: string) {
       .single();
 
     if (error) throw error;
-    return { success: true, data };
+
+    // Create token after successful registration
+    const token = await createToken(id);
+
+    return { 
+      success: true, 
+      data,
+      token 
+    };
   } catch (error) {
     console.error('Registration error:', error);
     return {
@@ -52,9 +61,24 @@ export async function login(email: string, password: string) {
     if (error) throw error;
     
     const passwordMatch = data?.password === password;
+    if (!passwordMatch) {
+      return {
+        success: false,
+        error: 'Invalid password'
+      };
+    }
+
+    // Create token after successful login
+    const token = await createToken(data.id);
+
     return {
-      success: passwordMatch,
-      error: passwordMatch ? null : 'Invalid password'
+      success: true,
+      data: {
+        id: data.id,
+        email: data.email,
+        name: data.name
+      },
+      token
     };
   } catch (error) {
     console.error('Login error:', error);
