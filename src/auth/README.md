@@ -1,65 +1,80 @@
-# Authentication Module
+# Authentication System
 
-This module handles user authentication including login and registration functionality.
+This folder contains the authentication system implementation using JWT tokens and Supabase.
 
 ## Components
 
 ### AuthForm
-The main container component that manages the switching between login and registration forms.
+The main authentication component that handles both login and registration flows. It manages the authentication token state and provides a clean interface for users to authenticate.
 
 ### LoginForm
-Handles user login with email and password fields. Includes:
-- Email validation
-- Password validation
-- Error handling
-- Success messages
-- Link to registration form
+Handles user login with email and password validation.
 
 ### RegisterForm
-Handles user registration with name, email, and password fields. Includes:
-- Name validation
-- Email validation
-- Password validation (min 6 characters)
-- Error handling
-- Success messages
-- Link to login form
-- "Create Fake Data" button for testing
+Handles user registration with name, email, and password validation.
 
 ### InputField
-Reusable form input component with:
-- Label
-- Input field
-- Error message display
-- Support for different input types (text, email, password)
-
-### Message
-Reusable component for displaying success and error messages.
-
-## Validation
-
-Validation is implemented both on the client and server side using the functions in `validate.ts`:
-- Email format validation
-- Required field validation
-- Password length validation
+A reusable form input component with validation and error handling.
 
 ## Server Actions
 
-The `actions.ts` file contains server-side functions for:
-- User registration
-- User login
-- Server-side validation
-- Database operations
+### register
+- Validates user input
+- Creates a new user in the Supabase profiles table
+- Generates a JWT token
+- Returns user data and token
+
+### login
+- Validates user credentials
+- Verifies password
+- Generates a JWT token
+- Returns user data and token
+
+## Token System
+
+The authentication system uses JWT tokens with the following characteristics:
+- Short-lived (15 minutes)
+- Contains only essential data (user ID and unique token ID)
+- Secured with HS256 algorithm
+- Includes JTI (JWT ID) for token uniqueness
+
+## Security Considerations
+
+Current implementation:
+- Client-side token storage (for development)
+- Basic password validation
+- Server-side validation of credentials
+
+Planned improvements:
+- HttpOnly cookie storage for tokens
+- Refresh token mechanism
+- CSRF protection
+- Rate limiting
+- Token blacklisting for logout
+- Secure password hashing
 
 ## Usage
 
-```tsx
-import { AuthForm } from '@/auth/AuthForm';
+```typescript
+// Login
+const result = await login(email, password);
+if (result.success) {
+  // Handle successful login
+  const { token, data } = result;
+}
 
-export default function Page() {
-  return <AuthForm />;
+// Register
+const result = await register(name, email, password);
+if (result.success) {
+  // Handle successful registration
+  const { token, data } = result;
 }
 ```
 
-## Styling
+## Development Notes
 
-The components use Tailwind CSS for styling and are designed to be responsive and user-friendly. 
+- The system is currently using client-side token storage for development purposes
+- In production, implement proper token storage in HttpOnly cookies
+- Add refresh token mechanism for better user experience
+- Implement proper error handling and user feedback
+- Add loading states for better UX 

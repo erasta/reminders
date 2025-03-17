@@ -21,17 +21,6 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
   const [success, setSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
-  const createFakeData = () => {
-    const id = crypto.randomUUID();
-    const last5 = id.slice(-5);
-    const name = `E${last5}`;
-    const email = `e${last5}@b.com`;
-    const password = '123123';
-
-    setFormData({ name, email, password });
-    setValidationErrors([]);
-  };
-
   const handleRegister = async () => {
     try {
       setError(null);
@@ -89,20 +78,12 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
           error={validationErrors.find(e => e.field === 'password')?.message}
         />
       </div>
-      <div className="flex gap-4 justify-center">
-        <button
-          onClick={handleRegister}
-          className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
-        >
-          Sign Up
-        </button>
-        <button
-          onClick={createFakeData}
-          className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600"
-        >
-          Create Fake Data
-        </button>
-      </div>
+      <button
+        onClick={handleRegister}
+        className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+      >
+        Sign Up
+      </button>
       <div className="text-center">
         <button
           onClick={onSwitchToLogin}

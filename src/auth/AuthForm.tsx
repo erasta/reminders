@@ -21,12 +21,25 @@ export function AuthForm() {
     // Same as login success
   };
 
+  const handleLogout = () => {
+    setToken(null);
+    // Here you would typically:
+    // 1. Clear the HttpOnly cookie (server-side)
+    // 2. Clear any refresh tokens
+    // 3. Redirect to login page
+  };
+
   if (token) {
     return (
       <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-6">Authenticated!</h2>
-        <p className="text-center">You are now logged in.</p>
-        {/* Add your authenticated content here */}
+        <p className="text-center mb-4">You are now logged in.</p>
+        <button
+          onClick={handleLogout}
+          className="w-full px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+        >
+          Logout
+        </button>
       </div>
     );
   }
