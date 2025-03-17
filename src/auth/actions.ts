@@ -29,7 +29,10 @@ export async function register(name: string, email: string, password: string) {
 
     return { 
       success: true, 
-      data,
+      data: {
+        name: data.name,
+        email: data.email
+      },
       token 
     };
   } catch (error) {
@@ -74,7 +77,6 @@ export async function login(email: string, password: string) {
     return {
       success: true,
       data: {
-        id: data.id,
         email: data.email,
         name: data.name
       },

@@ -7,7 +7,6 @@ import { Message } from './Message';
 import { validateRegistration, ValidationError, FormData } from './validate';
 
 interface UserData {
-  id: string;
   email: string;
   name: string;
 }
@@ -45,7 +44,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
         setError('Registration failed');
       } else if (result.token && result.data) {
         setSuccess(true);
-        onRegisterSuccess(result.token, result.data);
+        onRegisterSuccess(result.token, { email: result.data.email, name: result.data.name });
       } else {
         setError('Registration failed: No token received');
       }

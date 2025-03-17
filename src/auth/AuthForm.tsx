@@ -5,38 +5,38 @@ import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 
 interface UserData {
-  id: string;
   email: string;
   name: string;
 }
 
+interface LoginData {
+  token: string;
+  user: UserData;
+}
+
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loginData, setLoginData] = useState<LoginData | null>(null);
 
   const handleLoginSuccess = (newToken: string, user: UserData) => {
-    setToken(newToken);
-    setUserData(user);
+    setLoginData({ token: newToken, user });
   };
 
   const handleRegisterSuccess = (newToken: string, user: UserData) => {
-    setToken(newToken);
-    setUserData(user);
+    setLoginData({ token: newToken, user });
   };
 
   const handleLogout = () => {
-    setToken(null);
-    setUserData(null);
+    setLoginData(null);
   };
 
-  if (token) {
+  if (loginData) {
     return (
       <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-6">Authenticated!</h2>
         <div className="text-center mb-4">
-          <p className="text-gray-600">Welcome, {userData?.name}!</p>
-          <p className="text-gray-500 text-sm">{userData?.email}</p>
+          <p className="text-gray-600">Welcome, {loginData.user.name}!</p>
+          <p className="text-gray-500 text-sm">{loginData.user.email}</p>
         </div>
         <button
           onClick={handleLogout}
