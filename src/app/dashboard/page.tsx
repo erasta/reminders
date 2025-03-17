@@ -1,15 +1,14 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
 import ReminderForm from '@/components/ReminderForm';
 import { Company, Reminder } from '@/types';
 import { format } from 'date-fns';
+import { useLogin } from '@/contexts/LoginContext';
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { loginData } = useLogin();
   const router = useRouter();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -17,17 +16,25 @@ export default function DashboardPage() {
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (!loginData) {
+      router.push('/');
     }
-  }, [status, router]);
+  }, [loginData, router]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [companiesRes, remindersRes] = await Promise.all([
-          fetch('/api/companies'),
-          fetch('/api/reminders')
+          fetch('/api/companies', {
+            headers: {
+              'Authorization': `Bearer ${loginData?.token}`
+            }
+          }),
+          fetch('/api/reminders', {
+            headers: {
+              'Authorization': `Bearer ${loginData?.token}`
+            }
+          })
         ]);
 
         if (companiesRes.ok && remindersRes.ok) {
@@ -46,14 +53,18 @@ export default function DashboardPage() {
       }
     };
 
-    if (status === 'authenticated') {
+    if (loginData) {
       fetchData();
     }
-  }, [status]);
+  }, [loginData]);
 
   const handleReminderSuccess = () => {
     setEditingReminder(null);
-    fetch('/api/reminders')
+    fetch('/api/reminders', {
+      headers: {
+        'Authorization': `Bearer ${loginData?.token}`
+      }
+    })
       .then(res => res.json())
       .then(data => setReminders(data))
       .catch(error => console.error('Error refreshing reminders:', error));
@@ -65,6 +76,9 @@ export default function DashboardPage() {
     try {
       const res = await fetch(`/api/reminders/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${loginData?.token}`
+        }
       });
 
       if (res.ok) {
@@ -75,7 +89,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (!loginData || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-2xl">Loading...</div>
@@ -85,14 +99,13 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <h1 className="text-3xl font-bold text-gray-900">
-            Reminders for {session?.user?.name}
+            Reminders for {loginData.user.name}
           </h1>
           <h2 className="mt-1 text-lg text-gray-600">
-            Email: {session?.user?.email}
+            Email: {loginData.user.email}
           </h2>
           
           <div className="mt-8">

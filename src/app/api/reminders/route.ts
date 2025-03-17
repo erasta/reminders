@@ -1,21 +1,26 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { addDays } from 'date-fns';
 import { getCompanies } from '@/lib/companies';
 import { supabase } from '@/lib/supabase';
+import { verifyToken } from '@/auth/token';
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyToken(token);
+    if (!payload) {
+      return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    }
+
     const { data: reminders, error } = await supabase
       .from('reminders')
       .select('*')
-      .eq('user_id', session.user.id);
+      .eq('user_id', payload.userId);
 
     if (error) throw error;
     return NextResponse.json(reminders);
@@ -29,12 +34,18 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyToken(token);
+    if (!payload) {
+      return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    }
+
     const { companyId, companyUserId, lastEntryDate, customDays } = await request.json();
     
     if (!companyId || !companyUserId || !lastEntryDate) {
@@ -64,7 +75,7 @@ export async function POST(request: Request) {
     const { data: reminder, error } = await supabase
       .from('reminders')
       .insert([{
-        user_id: session.user.id,
+        user_id: payload.userId,
         company_id: companyId,
         company_user_id: companyUserId,
         last_entry_date: lastEntryDateTime.toISOString(),

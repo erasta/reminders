@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthForm } from '@/auth/AuthForm';
-import { AuthenticatedView } from '@/components/AuthenticatedView';
+import AuthenticatedView from '@/components/AuthenticatedView';
 import { useLogin } from '@/contexts/LoginContext';
 
 export default function HomePage() {

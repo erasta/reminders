@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Company, Reminder } from '@/types';
+import { useLogin } from '@/contexts/LoginContext';
 
 interface ReminderFormProps {
   companies: Company[];
@@ -11,6 +12,7 @@ interface ReminderFormProps {
 }
 
 export default function ReminderForm({ companies, onSuccess, editingReminder, onCancel }: ReminderFormProps) {
+  const { loginData } = useLogin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [companyId, setCompanyId] = useState('');
@@ -52,6 +54,7 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
         method: editingReminder ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${loginData?.token}`
         },
         body: JSON.stringify(data),
       });
