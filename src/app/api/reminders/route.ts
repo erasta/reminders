@@ -46,9 +46,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
 
-    const { companyId, companyUserId, lastEntryDate, customDays } = await request.json();
+    const body = await request.json();
+    console.log('POST /api/reminders - Request body:', body);
+
+    const { companyId, companyUserId, lastEntryDate, customDays } = body;
     
     if (!companyId || !companyUserId || !lastEntryDate) {
+      console.log('Missing required fields:', { companyId, companyUserId, lastEntryDate });
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -56,9 +60,11 @@ export async function POST(request: Request) {
     }
 
     const companies = await getCompanies();
+    console.log('Available companies:', companies);
     const company = companies.find(c => c.id === companyId);
     
     if (!company) {
+      console.log('Invalid company ID:', companyId);
       return NextResponse.json(
         { message: 'Invalid company' },
         { status: 400 }
@@ -71,6 +77,15 @@ export async function POST(request: Request) {
 
     const lastEntryDateTime = new Date(lastEntryDate);
     const nextSendDate = addDays(lastEntryDateTime, daysBeforeDeactivation);
+
+    console.log('Creating reminder with data:', {
+      user_id: payload.userId,
+      company_id: companyId,
+      company_user_id: companyUserId,
+      last_entry_date: lastEntryDateTime.toISOString(),
+      next_send_date: nextSendDate.toISOString(),
+      custom_days: company.days_before_deactivation === 0 ? customDays : null,
+    });
 
     const { data: reminder, error } = await supabase
       .from('reminders')
@@ -85,7 +100,12 @@ export async function POST(request: Request) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+
+    console.log('Successfully created reminder:', reminder);
     return NextResponse.json(reminder);
   } catch (error) {
     console.error('Create reminder error:', error);

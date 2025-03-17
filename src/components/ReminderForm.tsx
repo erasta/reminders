@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Company, Reminder } from '@/types';
 import { useLogin } from '@/contexts/LoginContext';
+import { Companies } from './companies/Companies';
 
 interface ReminderFormProps {
   companies: Company[];
@@ -81,34 +82,12 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="w-1/2">
-        <label htmlFor="companyId" className="block text-sm font-medium text-gray-700">
-          Company
-        </label>
-        <select
-          id="companyId"
-          name="companyId"
-          value={companyId}
-          onChange={(e) => setCompanyId(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10"
-          required
-        >
-          <option value="">Select a company</option>
-          {companies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {company.name} ({company.days_before_deactivation} days)
-            </option>
-          ))}
-        </select>
-        {selectedCompany?.policy_link && (
-          <a 
-            href={selectedCompany.policy_link} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="mt-1 text-sm text-indigo-600 hover:text-indigo-800 block"
-          >
-            View Policy
-          </a>
-        )}
+        <Companies 
+          onSelect={(company) => {
+            setCompanyId(company.id);
+          }}
+          selectedCompanyId={companyId}
+        />
       </div>
 
       {selectedCompany?.days_before_deactivation === 0 && (

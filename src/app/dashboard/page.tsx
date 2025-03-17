@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useLogin } from '@/contexts/LoginContext';
 
 export default function DashboardPage() {
-  const { loginData } = useLogin();
+  const { loginData, setLoginData } = useLogin();
   const router = useRouter();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -89,6 +89,11 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLogout = () => {
+    setLoginData(null);
+    router.push('/');
+  };
+
   if (!loginData || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,12 +106,22 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Reminders for {loginData.user.name}
-          </h1>
-          <h2 className="mt-1 text-lg text-gray-600">
-            Email: {loginData.user.email}
-          </h2>
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Reminders for {loginData.user.name}
+              </h1>
+              <h2 className="mt-1 text-lg text-gray-600">
+                Email: {loginData.user.email}
+              </h2>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+            >
+              Logout
+            </button>
+          </div>
           
           <div className="mt-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Reminder</h2>

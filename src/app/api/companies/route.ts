@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { Company } from '@/types';
 
 export async function GET() {
   try {
@@ -14,14 +15,17 @@ export async function GET() {
     const fileContents = await fs.readFile(absolutePath, 'utf-8');
     const rows = fileContents.split('\n').slice(1); // Skip header row
     
-    const companies = rows
+    const companies: Company[] = rows
       .filter(row => row.trim())
       .map(row => {
-        const [company_id, company_name, days_before_deactivation, link_to_policy] = row.split(',');
+        const [company_id, company_name, days_before_deactivation, link_to_policy, activities_to_avoid_deactivation] = row.split(',');
         return {
+          id: company_id,
           name: company_name,
-          daysBeforeDeactivation: parseInt(days_before_deactivation),
-          policyLink: link_to_policy
+          days_before_deactivation: parseInt(days_before_deactivation),
+          policy_link: link_to_policy || '',
+          link_to_policy: link_to_policy || null,
+          activities_to_avoid_deactivation: activities_to_avoid_deactivation || null
         };
       });
 
