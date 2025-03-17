@@ -79,13 +79,15 @@ export default function ReminderForm({ companies, onSuccess, editingReminder, on
     }
   };
 
+  const handleCompanySelect = (company: Company) => {
+    setCompanyId(company.id);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="w-1/2">
         <Companies 
-          onSelect={(company) => {
-            setCompanyId(company.id);
-          }}
+          onSelect={handleCompanySelect}
           selectedCompanyId={companyId}
         />
       </div>
