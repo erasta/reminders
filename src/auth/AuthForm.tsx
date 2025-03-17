@@ -4,36 +4,40 @@ import { useState } from 'react';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
-  const handleLoginSuccess = (newToken: string) => {
+  const handleLoginSuccess = (newToken: string, user: UserData) => {
     setToken(newToken);
-    // Here you would typically:
-    // 1. Store the token in an HttpOnly cookie (server-side)
-    // 2. Redirect to the dashboard
-    // 3. Set up token refresh mechanism
+    setUserData(user);
   };
 
-  const handleRegisterSuccess = (newToken: string) => {
+  const handleRegisterSuccess = (newToken: string, user: UserData) => {
     setToken(newToken);
-    // Same as login success
+    setUserData(user);
   };
 
   const handleLogout = () => {
     setToken(null);
-    // Here you would typically:
-    // 1. Clear the HttpOnly cookie (server-side)
-    // 2. Clear any refresh tokens
-    // 3. Redirect to login page
+    setUserData(null);
   };
 
   if (token) {
     return (
       <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-6">Authenticated!</h2>
-        <p className="text-center mb-4">You are now logged in.</p>
+        <div className="text-center mb-4">
+          <p className="text-gray-600">Welcome, {userData?.name}!</p>
+          <p className="text-gray-500 text-sm">{userData?.email}</p>
+        </div>
         <button
           onClick={handleLogout}
           className="w-full px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"

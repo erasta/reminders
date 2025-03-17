@@ -6,9 +6,15 @@ import { InputField } from './InputField';
 import { Message } from './Message';
 import { validateLogin, ValidationError, FormData } from './validate';
 
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+}
+
 interface LoginFormProps {
   onSwitchToRegister: () => void;
-  onLoginSuccess: (token: string) => void;
+  onLoginSuccess: (token: string, user: UserData) => void;
 }
 
 export function LoginForm({ onSwitchToRegister, onLoginSuccess }: LoginFormProps) {
@@ -37,10 +43,9 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }: LoginFormProps
       
       if (!result.success) {
         setError('Login failed');
-      } else if (result.token) {
+      } else if (result.token && result.data) {
         setSuccess(true);
-        // Store the token
-        onLoginSuccess(result.token);
+        onLoginSuccess(result.token, result.data);
       } else {
         setError('Login failed: No token received');
       }
